@@ -23,7 +23,7 @@ public class HashCode2017 {
     public static void main(String[] args) throws IOException {
 
         Charset charset = Charset.forName("US-ASCII");
-        Path file = FileSystems.getDefault().getPath("src", "me_at_the_zoo.in");
+        Path file = FileSystems.getDefault().getPath("src", "videos_worth_spreading.in");
         BufferedReader reader = Files.newBufferedReader(file, charset);
         String line = reader.readLine();
 
@@ -57,6 +57,14 @@ public class HashCode2017 {
             }
         }
 
+        //video latency
+        int[][] vidLat = new int[endNo][vidNo];
+        for (int i =0; i< endNo; i++) {
+            for (int j =0; j< vidNo; j++) {
+                vidLat[i][j] = endpointsLatency[i][0];
+            }
+        }
+
         //store requests
         for (int i = 0; i < reqNo; i++) {
             line = reader.readLine();
@@ -69,19 +77,19 @@ public class HashCode2017 {
         BufferedWriter bw = null;
         FileWriter fw = null;
 
-        fw = new FileWriter("me_at_the_zoo.out");
+        fw = new FileWriter("videos.out");
         bw = new BufferedWriter(fw);
         bw.write(String.format("%d\n", cacheNo));
         System.out.print(String.format("%d\n", cacheNo));
 
         for (int i = 0; i < cacheNo; i++) {
-            Cache c = new Cache(i, cacheSize, vidNo, videos, requests, endpointsLatency);
+            Cache c = new Cache(i, cacheSize, vidNo, videos, requests, endpointsLatency, vidLat);
             for (int j = 0; j < endNo; j++) {
                 if (endpointsLatency[j][i+1] != 0) {
                     c.connectEndPoint(j);
                 }
             }
-            c.recalculate();
+            vidLat = c.recalculate();
             bw.write(String.format("%d ", i));
             System.out.print(String.format("%d ", i));
             for(int vid: c.getVideos()){

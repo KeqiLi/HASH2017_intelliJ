@@ -14,9 +14,10 @@ public class Cache {
     private int[] demand;
     private ArrayList<Integer> videos = new ArrayList<Integer>();
     private int[][] lattencies;
+    private int[][] vidLat;
     private int no;
 
-    public Cache(int no, int size, int noVid, int[] vidSize, int[][] requests, int[][] lattencies){
+    public Cache(int no, int size, int noVid, int[] vidSize, int[][] requests, int[][] lattencies, int[][] vidLat){
         this.no = no;
         this.size = size;
         this.noVid = noVid;
@@ -25,16 +26,17 @@ public class Cache {
         this.vidSize = vidSize;
         this.requests = requests;
         this.lattencies = lattencies;
+        this.vidLat = vidLat;
     }
 
     public void connectEndPoint(int point){
         this.endPoints.add(point);
     }
 
-    public void recalculate(){
+    public int[][] recalculate(){
         this.demand = new int[noVid];
         for(int p: endPoints){
-            Arrays.setAll(this.demand, i -> this.demand[i] + 100*requests[p][i]*(lattencies[p][0]-lattencies[p][no+1])/lattencies[p][0]);
+            Arrays.setAll(this.demand, i -> this.demand[i] + requests[p][i]*(vidLat[p][i]-lattencies[p][no+1]));
         }
 
         Pair[] pairs = new Pair[noVid];
@@ -47,12 +49,14 @@ public class Cache {
         for(int i=0; i<noVid; i++){
             if (storage + vidSize[pairs[i].index] <= this.size) {
                 storage += vidSize[pairs[i].index];
-                //***********
-                //optimisation
-                //***********
                 this.videos.add(pairs[i].index);
+                for(int p: endPoints){
+                    vidLat[p][pairs[i].index] = lattencies[p][no+1];
+                }
             }
         }
+
+        return vidLat;
     }
 
     public ArrayList<Integer> getVideos(){
